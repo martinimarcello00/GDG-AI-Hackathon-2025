@@ -1,10 +1,11 @@
 import requests
 import json
 import random
+import re
 
-def create_session():
+def create_session(agent_name="hr-agent"):
     uid = f"u_{random.randint(100, 999)}"
-    url = f"http://0.0.0.0:8000/apps/hr-agent/users/{uid}/sessions/s_{random.randint(100, 999)}"
+    url = f"http://0.0.0.0:8000/apps/{agent_name}/users/{uid}/sessions/s_{random.randint(100, 999)}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -18,14 +19,25 @@ def create_session():
         return None
     
 def parse_agent_response(response):
-    followUp = {}
+    followUp = ""
     insights = ""
+    summary = ""
     for content in response:
         if content["author"] == "followup_agent" and "text" in content["content"]["parts"][0].keys():
-            followUp =json.loads(content["content"]["parts"][0]["text"])
+            followUp = content["content"]["parts"][0]["text"]
         elif content["author"] == "insights_agent" and "text" in content["content"]["parts"][0].keys():
-            insights = json.loads(content["content"]["parts"][0]["text"])
-    return {"followUp" : followUp, "insights": insights}
+            insights = content["content"]["parts"][0]["text"]
+        elif content["author"] == "retrieve_user_summary_agent" and "text" in content["content"]["parts"][0].keys():
+            summary = content["content"]["parts"][0]["text"]
+    return {"followUp" : followUp, "insights": insights, "summary": summary}
+
+def parse_cv_response(response):
+    # Extract the markdown block from the response
+    for content in reversed(response):
+        if content["author"] == "cv_agent" and "text" in content["content"]["parts"][0].keys():
+            text = content["content"]["parts"][0]["text"]
+            return text
+    return None
 
 def ask_agent(session_data, question):
     url = "http://0.0.0.0:8000/run"
@@ -50,13 +62,29 @@ def ask_agent(session_data, question):
         return None
 
 if __name__ == "__main__":
-    session_data = create_session()
-    print("Session Data:", session_data)
-    if session_data:
-        question = "Hi, I'm Marcello Martini, a computer science and engineering student at Politecnico di Milano. I am interested in AI and machine learning."
-        response_data = ask_agent(session_data, question)
+
+    previous_summary = "";
+    # Create session searchcv
+    session_data_searchcv = create_session(agent_name="searchcv")
+    print("Session Data:", session_data_searchcv)
+    if session_data_searchcv:
+        question = "Find me the CV of Marcello Martini"
+        response_data = ask_agent(session_data_searchcv, question)
         # Print the json in a readable format
         if response_data:
+            print("Response Data:", json.dumps(response_data, indent=4))
+            parse_cv_response(response_data)
+        else:
+            print("No response data received.")
+    
+
+    session_data_hr = create_session(agent_name="hr-agent")
+    if session_data_hr:
+        question = f"Hi, I'm Marcello Martini, a computer science and engineering student at Politecnico di Milano. I was a professional swimmer.\n Previous summary: {previous_summary}" 
+        response_data = ask_agent(session_data_hr, question)
+        # Print the json in a readable format
+        if response_data:
+            print("Response Data:", json.dumps(response_data, indent=4))
             print(parse_agent_response(response_data))
         else:
             print("No response data received.")
