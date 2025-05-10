@@ -1,6 +1,17 @@
 from google.adk.tools import ToolContext
 
-def update_user_query(summary: dict, tool_context: ToolContext) -> dict:
+def retrieve_user_summary(tool_context: ToolContext) -> dict:
+    """
+    Retrieve the previous summary from the context.
+    """
+    prev_summary = tool_context.state.get("summary", "")
+    if prev_summary:
+        return {'status': 'success', 'message': 'Summary retrieved successfully.', 'summary': prev_summary}
+    else:
+        return {'status': 'error', 'message': 'No previous summary found.'}
+
+
+def update_summary(summary: dict, tool_context: ToolContext) -> dict:
     """
     Store the user query in the context.
     """
@@ -8,7 +19,6 @@ def update_user_query(summary: dict, tool_context: ToolContext) -> dict:
     if prev_summary:
         tool_context.state["prev_summary"] = prev_summary
     tool_context.state["summary"] = summary
-
     return {'status': 'success', 'message': 'Summary update successfully.'}
 
 def retrive_summaries(tool_context: ToolContext) -> dict:
