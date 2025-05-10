@@ -19,9 +19,11 @@ import requests
 import random
 import json
 
+agent_host = 'localhost:8000'
+
 def create_session():
     uid = f"u_{random.randint(100, 999)}"
-    url = f"http://0.0.0.0:8000/apps/hr-agent/users/{uid}/sessions/s_{random.randint(100, 999)}"
+    url = f"http://{agent_host}/apps/hr-agent/users/{uid}/sessions/s_{random.randint(100, 999)}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -36,7 +38,7 @@ def create_session():
 
 
 def ask_agent(session_data, question):
-    url = "http://0.0.0.0:8000/run"
+    url = f"http://{agent_host}/run"
     headers = {
         "Content-Type": "application/json"
     }
@@ -230,18 +232,18 @@ def main():
                 # Otherwise edit the existing one.
                 if phrase_complete:
                     transcription.append(text)
-
+                    print(text)
                     ask_agent(session, text)
 
                 else:
                     transcription[-1] = text
 
                 # Clear the console to reprint the updated transcription.
-                os.system('cls' if os.name=='nt' else 'clear')
-                for line in transcription:
-                    print(line)
-                # Flush stdout.
-                print('', end='', flush=True)
+                # os.system('cls' if os.name=='nt' else 'clear')
+                # for line in transcription:
+                #     print(line)
+                # # Flush stdout.
+                # print('', end='', flush=True)
             else:
                 # Infinite loops are bad for processors, must sleep.
                 sleep(0.25)
