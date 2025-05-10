@@ -17,6 +17,16 @@ def create_session():
         print(f"Failed to create session: {response.status_code}")
         return None
     
+def parse_agent_response(response):
+    followUp = {}
+    insights = ""
+    for content in response:
+        if content["author"] == "followup_agent" and "text" in content["content"]["parts"][0].keys():
+            followUp =json.loads(content["content"]["parts"][0]["text"])
+        elif content["author"] == "insights_agent" and "text" in content["content"]["parts"][0].keys():
+            insights = json.loads(content["content"]["parts"][0]["text"])
+    return {"followUp" : followUp, "insights": insights}
+
 def ask_agent(session_data, question):
     url = "http://0.0.0.0:8000/run"
     headers = {
@@ -47,9 +57,11 @@ if __name__ == "__main__":
         response_data = ask_agent(session_data, question)
         # Print the json in a readable format
         if response_data:
-            print("Response Data:", json.dumps(response_data, indent=4))
+            print(parse_agent_response(response_data))
         else:
             print("No response data received.")
     else:
-        print("No session data available.")
+        print("No session data available.") 
+    
+
     
