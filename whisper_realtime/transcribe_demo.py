@@ -15,6 +15,48 @@ from queue import Queue
 from time import sleep
 from sys import platform
 
+import requests
+import random
+import json
+
+def create_session():
+    uid = f"u_{random.randint(100, 999)}"
+    url = f"http://0.0.0.0:8000/apps/hr-agent/users/{uid}/sessions/s_{random.randint(100, 999)}"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    payload = {}
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    if response.status_code == 200:
+        print("Session created successfully.")
+        return response.json()
+    else:
+        print(f"Failed to create session: {response.status_code}")
+        return None
+
+
+def ask_agent(session_data, question):
+    url = "http://0.0.0.0:8000/run"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "session_id": session_data["id"],
+        "user_id": session_data["user_id"],
+        "app_name": session_data["app_name"],
+        "new_message": {
+            "role": "user",
+                "parts": [{"text": str(question)}]
+            }
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    if response.status_code == 200:
+        print("Question sent successfully.")
+        return response.json()
+    else:
+        print(f"Failed to send question: {response.status_code}")
+        return None
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -152,6 +194,8 @@ def main():
     # Cue the user that we're ready to go.
     print("Model loaded.\n")
 
+    session = create_session()
+
     while True:
         try:
             now = datetime.utcnow()
@@ -186,6 +230,9 @@ def main():
                 # Otherwise edit the existing one.
                 if phrase_complete:
                     transcription.append(text)
+
+                    ask_agent(session, text)
+
                 else:
                     transcription[-1] = text
 

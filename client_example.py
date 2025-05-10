@@ -1,8 +1,10 @@
 import requests
 import json
+import random
 
 def create_session():
-    url = "http://0.0.0.0:8000/apps/hr-agent/users/u_123/sessions/s_123"
+    uid = f"u_{random.randint(100, 999)}"
+    url = f"http://0.0.0.0:8000/apps/hr-agent/users/{uid}/sessions/s_{random.randint(100, 999)}"
     headers = {
         "Content-Type": "application/json"
     }
