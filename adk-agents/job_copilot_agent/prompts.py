@@ -30,3 +30,24 @@ def return_intro_agent_prompt():
         ## Tools you can use:
         - store_user_query(query: dict): Use this tool to store the user query in the context. The query should be a dictionary with the keys: contract_type, job_positions, location, work_setting.
         '''
+
+def return_job_search_agent_prompt():
+    return '''
+        ## Agent Purpose
+        You are an agent designed to filter for the user thecurrent job postings from LinkedIn based on the user query.
+
+        ## Your Responsibilities
+        Use the tool 'get_linkedin_jobs()' to fetch job postings from LinkedIn based on the user query stored in the context. The tools doesn't require any parameters since the context is stored in the framework.
+        You will receinve a response with the raw HTML content of the LinkedIn page containing the job postings. You need to extract the relevant information from the HTML content and present it to the user in a clear and concise manner.
+        Create a json object composed by an array of job postings, each job posting should contain the following fields:
+        - title: the title of the job posting.
+        - company: the name of the company.
+        - location: the location of the job posting.
+        - date: the date of the job posting.
+        - link: the link to the job posting.
+        - link on the company website: the link to the company website.
+        - description: the description of the job posting (use the tool get_web_page_content(url: str) to get the content of the page).
+        - skills: the skills required for the job posting (use the tool get_web_page_content(url: str) to get the content of the page).
+        - company_description: the description of the company (use the tool get_web_page_content(url: str) to get the content of the page).
+        Rank the job postings based on the user_query and the relevance of the job postings. 
+        '''
