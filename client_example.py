@@ -70,6 +70,7 @@ if __name__ == "__main__":
     if session_data_searchcv:
         question = "Find me the CV of Marcello Martini"
         response_data = ask_agent(session_data_searchcv, question)
+        previous_summary = parse_cv_response(response_data)
         # Print the json in a readable format
         if response_data:
             print("Response Data:", json.dumps(response_data, indent=4))
@@ -80,7 +81,8 @@ if __name__ == "__main__":
 
     session_data_hr = create_session(agent_name="hr-agent")
     if session_data_hr:
-        question = f"Hi, I'm Marcello Martini, a computer science and engineering student at Politecnico di Milano. I was a professional swimmer.\n Previous summary: {previous_summary}" 
+        question = f"Hi, I'm Marcello Martini, a computer science and engineering student at Politecnico di Milano. I was a professional swimmer.\n Previous summary: {previous_summary}"
+        print ("Question:", question)
         response_data = ask_agent(session_data_hr, question)
         # Print the json in a readable format
         if response_data:
