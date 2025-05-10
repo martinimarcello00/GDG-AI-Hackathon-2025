@@ -1,11 +1,20 @@
 import requests
 import json
 import random
-import re
+from whisper_realtime.transcribe_demo import transcribe
+import threading
+import time
+import signal
+import sys
+
+host = 'localhost:8000'
+
+# Create a stop event
+stop_event = threading.Event()
 
 def create_session(agent_name="hr-agent"):
     uid = f"u_{random.randint(100, 999)}"
-    url = f"http://0.0.0.0:8000/apps/{agent_name}/users/{uid}/sessions/s_{random.randint(100, 999)}"
+    url = f"http://{host}/apps/{agent_name}/users/{uid}/sessions/s_{random.randint(100, 999)}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -40,7 +49,7 @@ def parse_cv_response(response):
     return None
 
 def ask_agent(session_data, question):
-    url = "http://0.0.0.0:8000/run"
+    url = f"http://{host}/run"
     headers = {
         "Content-Type": "application/json"
     }
@@ -77,11 +86,11 @@ if __name__ == "__main__":
             parse_cv_response(response_data)
         else:
             print("No response data received.")
-    
 
     session_data_hr = create_session(agent_name="hr-agent")
     if session_data_hr:
-        question = f"Hi, I'm Marcello Martini, a computer science and engineering student at Politecnico di Milano. I was a professional swimmer.\n Previous summary: {previous_summary}"
+        # question = f"Hi, I'm Marcello Martini, a computer science and engineering student at Politecnico di Milano. I was a professional swimmer.\n Previous summary: {previous_summary}"
+        question = f"Previous summary: {previous_summary}"
         print ("Question:", question)
         response_data = ask_agent(session_data_hr, question)
         # Print the json in a readable format
@@ -92,6 +101,21 @@ if __name__ == "__main__":
             print("No response data received.")
     else:
         print("No session data available.") 
+
+    # Start whisper
+    whisper_thread = threading.Thread(target=transcribe, args=('medium', session_data_hr, 1000, 10, 10))
+    whisper_thread.start()
+
+    try:
+        while True:
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("Stopping...")
+        stop_event.set()  # Signal the thread to stop
+        whisper_thread.join()
+        print("Thread has exited cleanly.")
+        sys.exit(0)
+
     
 
     
