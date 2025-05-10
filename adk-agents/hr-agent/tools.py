@@ -4,7 +4,9 @@ def update_user_query(summary: dict, tool_context: ToolContext) -> dict:
     """
     Store the user query in the context.
     """
-    tool_context.state["prev_summary"] = tool_context.state["summary"]
+    prev_summary = tool_context.state.get("summary")
+    if prev_summary:
+        tool_context.state["prev_summary"] = prev_summary
     tool_context.state["summary"] = summary
 
     return {'status': 'success', 'message': 'Summary update successfully.'}
