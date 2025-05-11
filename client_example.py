@@ -1,7 +1,7 @@
 import requests
 import json
 import random
-from whisper_realtime.transcribe_demo import transcribe
+from whisper_realtime.transcribe import transcribe
 import threading
 import time
 import signal
