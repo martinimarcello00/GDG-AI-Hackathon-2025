@@ -7,6 +7,7 @@ import time
 import signal
 import sys
 import os
+import argparse
 
 host = 'localhost:8000'
 
@@ -73,6 +74,11 @@ def ask_agent(session_data, question):
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description='Client for interacting with the HR agent and SearchCV')
+    parser.add_argument('--prompt', default='Find the CV', help='Prompt for the HR agent')
+
+    args = parser.parse_args()
+
     # delete the file response.json if it exists
     try:
         os.remove("response.json")
@@ -87,7 +93,8 @@ if __name__ == "__main__":
     session_data_searchcv = create_session(agent_name="searchcv")
     print("Session Data:", session_data_searchcv)
     if session_data_searchcv:
-        question = "Find me the CV of Marcello Martini"
+        question = args.prompt
+        print ("Prompt hr-agent:", question)
         response_data = ask_agent(session_data_searchcv, question)
         previous_summary = parse_cv_response(response_data)
         # Print the json in a readable format
