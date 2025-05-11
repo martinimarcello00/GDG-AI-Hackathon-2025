@@ -17,10 +17,28 @@ def read_cv_file(filename: str):
         
         if platform.system() == 'Darwin':       # macOS
             subprocess.call(['open', full_path])
+            # Position window using AppleScript
+            applescript = '''
+            tell application "System Events"
+                delay 0.5
+                set frontApp to name of first application process whose frontmost is true
+                tell process frontApp
+                    set position of front window to {0, 22}
+                    set size of front window to {500, 900}
+                end tell
+            end tell
+            '''
+            subprocess.run(['osascript', '-e', applescript])
         elif platform.system() == 'Windows':    # Windows
             os.startfile(full_path)
+            # For Windows, you would need pywin32 for window positioning
+            # Basic opening is done without positioning
         else:                                   # linux variants
             subprocess.call(['xdg-open', full_path])
+            # For Linux with X11, you could use wmctrl if installed:
+            # import time
+            # time.sleep(1)
+            # subprocess.call(['wmctrl', '-r', os.path.basename(full_path), '-e', '0,0,0,500,700'])
 
         
         # Open the file with the default application (macOS specific)
