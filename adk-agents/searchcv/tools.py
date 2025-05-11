@@ -1,5 +1,5 @@
 from google.adk.tools import ToolContext
-import os
+import subprocess, os, platform
 from pypdf import PdfReader
 
 def read_cv_file(filename: str):
@@ -14,6 +14,14 @@ def read_cv_file(filename: str):
             extracted = page.extract_text()
             if extracted:
                 text += extracted + "\n"
+        
+        if platform.system() == 'Darwin':       # macOS
+            subprocess.call(['open', full_path])
+        elif platform.system() == 'Windows':    # Windows
+            os.startfile(full_path)
+        else:                                   # linux variants
+            subprocess.call(['xdg-open', full_path])
+
         
         # Open the file with the default application (macOS specific)
         # os.system(f"open '{full_path}'")
