@@ -6,6 +6,7 @@ import threading
 import time
 import signal
 import sys
+import os
 
 host = 'localhost:8000'
 
@@ -72,6 +73,15 @@ def ask_agent(session_data, question):
 
 if __name__ == "__main__":
 
+    # delete the file response.json if it exists
+    try:
+        os.remove("response.json")
+    except OSError:
+        if os.path.exists("response.json"):
+            print("Error deleting file")
+        else:
+            print("File does not exist")
+
     previous_summary = "";
     # Create session searchcv
     session_data_searchcv = create_session(agent_name="searchcv")
@@ -96,11 +106,12 @@ if __name__ == "__main__":
         # Print the json in a readable format
         if response_data:
             print("Response Data:", json.dumps(response_data, indent=4))
-            print(parse_agent_response(response_data))
+            json.dump(parse_agent_response(response_data), open("response.json", "w"), indent=4)
+
         else:
             print("No response data received.")
     else:
-        print("No session data available.") 
+        print("No session data available.")
 
     # Start whisper
     whisper_thread = threading.Thread(target=transcribe, args=('medium', session_data_hr, 1000, 10, 10))

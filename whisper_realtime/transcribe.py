@@ -170,19 +170,19 @@ def transcribe(model, session, non_english=False, energy_threshold=1000, record_
             # Infinite loops are bad for processors, must sleep.
             sleep(0.25)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="base", help="Model to use",
-                        choices=["tiny", "base", "small", "medium", "large"])
-    parser.add_argument("--session", required=True,
-                        help="JSON string containing session data")
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("--model", default="base", help="Model to use",
+#                         choices=["tiny", "base", "small", "medium", "large"])
+#     parser.add_argument("--session", required=True,
+#                         help="JSON string containing session data")
     
-    args = parser.parse_args()
+#     args = parser.parse_args()
     
-    try:
-        session = json.loads(args.session)
-        print(f"Session loaded: {session}")
-        transcribe(args.model, session)
-    except json.JSONDecodeError as e:
-        print(f"Error parsing session JSON: {e}")
-        exit(1)
+#     try:
+#         session = json.loads(args.session)
+#         print(f"Session loaded: {session}")
+#         transcribe(args.model, session)
+#     except json.JSONDecodeError as e:
+#         print(f"Error parsing session JSON: {e}")
+#         exit(1)
