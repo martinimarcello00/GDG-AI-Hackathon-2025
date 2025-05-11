@@ -1,5 +1,0 @@
-{
-    "followUp": "The new summary contains the information \"I'm qualified on the main\".\n\nCan you elaborate on the qualifications you possess that make you a strong fit for this role?\n",
-    "insights": "```markdown\nBeing qualified in HR provides expertise in data analysis, statistical methods, and interpretation of HR metrics, which are highly valued by employers [4, 5]. HR professionals with these qualifications can optimize the workforce, align it with company goals, and make data-driven decisions in recruitment, retention, performance management, and workforce planning [1, 4]. Certifications such as SHRM-SCP or SPHR can significantly enhance credibility and open doors to career advancement and leadership roles [1].\n```",
-    "summary": "Okay, I'm ready to generate a follow-up question based on the conversation summary. First, I need to retrieve the summaries using the `retrive_summaries` tool.\n```\n\n"
-}

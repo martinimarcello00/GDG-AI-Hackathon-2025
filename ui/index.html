@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Welcome to Talent Tracer!</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: "Open Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #edf2f7; /* Lighter blue-gray background */
+      color: #333333;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: flex-end; /* Align content to the bottom */
+      align-items: stretch; /* Stretch content to full width */
+      width: 100%; /* Ensure full width */
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .chatbox {
+      padding: 20px;
+      flex: 0 0 auto;
+      width: calc(100% - 40px); /* Full width minus padding */
+      background-color: rgba(255, 255, 255, 0.4); /* Semi-transparent white */
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+      z-index: 10; /* Ensure it's above other elements */
+    }
+
+    .input-container {
+      display: flex;
+      margin-top: 10px;
+      width: 100%; /* Full width of parent */
+    }
+
+    .input-container textarea {
+      flex: 1;
+      resize: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid #d0d9e1;
+      background-color: #f0f4f8; /* Soft blue-gray background */
+      color: #333333;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      max-height: 80px; /* Make it thinner */
+    }
+    
+    .input-container textarea:focus {
+      outline: none;
+      border-color: #3f7ebd;
+      box-shadow: 0 0 0 3px rgba(63, 126, 189, 0.15);
+    }
+
+    .input-container button {
+      margin-left: 10px;
+      padding: 10px 15px;
+      border-radius: 5px;
+      background-color: #3f7ebd;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .arrow-icon {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-bottom: 16px solid white;
+      transform: rotate(90deg); /* Rotate to point right */
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 18px;
+      color: #3f7ebd;
+      font-weight: 500;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 1; }
+      100% { opacity: 0.6; }
+    }
+
+    .markdown-viewer {
+      display: none;
+      padding: 24px;
+      background-color: #f0f4f8; /* Matching soft blue-gray background */
+      color: #333333;
+      overflow-y: auto;
+      height: auto; /* Start with auto height to fit content */
+      width: auto; /* Full width of the container */
+      border: 1px solid #d0d9e1;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      transition: height 0.3s ease; /* Smooth transition when height changes */
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+    
+    .section p {
+      margin-top: 0;
+      color: #4a5568;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .markdown-content {
+      line-height: 1.6;
+    }
+    
+    .markdown-content ul, .markdown-content ol {
+      padding-left: 20px;
+      margin: 10px 0;
+    }
+    
+    .markdown-content code {
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+    
+    .markdown-content pre {
+      background-color: rgba(0, 0, 0, 0.05);
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    
+    .markdown-content pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+
+    h3 {
+      margin: 0;
+      color: #3f7ebd;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    
+    .section h4 {
+      margin: 0 0 10px;
+      color: #3f7ebd;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+  </style>
+</head>
+<body>
+  <div class="chatbox">
+    <h3>Welcome to Talent Tracer!</h3>
+    <div class="input-container">
+      <textarea id="question" rows="2" placeholder="How can I help you today?"></textarea>
+      <button id="send"><div class="arrow-icon"></div></button>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Processing your request... This may take a few moments.</div>
+  <div id="markdown-viewer" class="markdown-viewer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    // Function to update the markdown viewer with response data
+    function updateMarkdownViewer(response) {
+      const markdownViewer = document.getElementById('markdown-viewer');
+      
+      // Configure marked options for better rendering
+      marked.setOptions({
+        breaks: true,           // Convert \n to <br>
+        gfm: true,              // Enable GitHub Flavored Markdown
+        headerIds: true,        // Generate IDs for headings
+        smartLists: true,       // Better list rendering
+        highlight: function(code, lang) {
+          // Simple syntax highlighting for code blocks
+          return code.replace(/[{}]/g, match => 
+            `<span style="color: #aa4422;">${match}</span>`)
+        }
+      });
+      
+      // Sanitize and render responses with markdown
+      const followUpContent = response.followUp ? response.followUp.trim() : '';
+      const insightsContent = response.insights ? response.insights.trim() : '';
+      const summaryContent = response.summary ? response.summary.trim() : '';
+      
+      // Helper function to extract content from markdown code blocks
+      const extractFromCodeBlock = (text) => {
+        if (text.startsWith('```') && text.endsWith('```')) {
+          // Extract the content between the backticks
+          const lines = text.split('\n');
+          if (lines.length >= 3) {
+            // Remove the first and last lines (the backticks)
+            return lines.slice(1, lines.length - 1).join('\n');
+          }
+        }
+        return text;
+      };
+      
+      // Process content to handle markdown code blocks
+      const processedInsights = extractFromCodeBlock(insightsContent);
+      const processedSummary = extractFromCodeBlock(summaryContent);
+      
+      // Render with marked (or fallback to default message)
+      const followUpHtml = followUpContent ? marked.parse(followUpContent) : '<em>No follow-up questions available.</em>';
+      const insightsHtml = processedInsights ? marked.parse(processedInsights) : '<em>No insights available.</em>';
+      const summaryHtml = processedSummary ? marked.parse(processedSummary) : '';
+      
+      // Populate the markdown viewer with sections
+      markdownViewer.innerHTML = `
+        <div class="section">
+          <h4>Questions</h4>
+          <div class="markdown-content">${followUpHtml}</div>
+        </div>
+        <div class="section">
+          <h4>Insights</h4>
+          <div class="markdown-content">${insightsHtml}</div>
+        </div>
+        ${summaryContent ? `
+        <div class="section">
+          <h4>Summary</h4>
+          <div class="markdown-content">${summaryHtml}</div>
+        </div>` : ''}
+      `;
+      
+      // Dynamically adjust height based on content
+      setTimeout(adjustViewerHeight, 100);
+    }
+
+    // Function to send the message
+    async function sendMessage() {
+      const question = document.getElementById('question').value.trim();
+      if (!question) return;
+
+      // Reset stored values when sending a new message
+      lastFollowUp = '';
+      lastInsights = '';
+
+      // Hide chatbox, show loading indicator
+      document.querySelector('.chatbox').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      
+      console.log('Sending query to main process:', question);
+
+      try {
+        // Call the main process to handle the request
+        const response = await ipcRenderer.invoke('process-cv', question);
+        console.log('Received initial response:', response);
+        
+        // Hide loading indicator, show markdown viewer
+        document.getElementById('loading').style.display = 'none';
+        const markdownViewer = document.getElementById('markdown-viewer');
+        markdownViewer.style.display = 'block';
+
+        // Update the UI with the initial response
+        updateMarkdownViewer(response);
+        
+        // Store the initial values
+        lastFollowUp = response.followUp || '';
+        lastInsights = response.insights || '';
+      } catch (error) {
+        console.error('Error processing query:', error);
+        document.getElementById('loading').style.display = 'none';
+        document.querySelector('.chatbox').style.display = 'block';
+        alert('Error processing your request. Please try again.');
+      }
+    }
+
+    // Listen for updates from the main process
+    ipcRenderer.on('response-update', (_event, updatedData) => {
+      console.log('Received updated data from main process:', updatedData);
+      
+      // Only update if we're showing the markdown viewer and have valid data
+      if (document.getElementById('markdown-viewer').style.display === 'block' && updatedData) {
+        // Compare with previous data to see if it's actually changed
+        const newFollowUp = updatedData.followUp || '';
+        const newInsights = updatedData.insights || '';
+        const newSummary = updatedData.summary || '';
+        
+        // Only update if there's new content
+        if (newFollowUp !== lastFollowUp || newInsights !== lastInsights) {
+          console.log('Content has changed, updating UI');
+          updateMarkdownViewer(updatedData);
+          
+          // Store the latest values
+          lastFollowUp = newFollowUp;
+          lastInsights = newInsights;
+          
+          // Adjust height after content change
+          setTimeout(adjustViewerHeight, 100);
+        } else {
+          console.log('Content unchanged, no UI update needed');
+        }
+      }
+    });
+    
+    // Variables to store the last state for comparison
+    let lastFollowUp = '';
+    let lastInsights = '';
+
+    // Click event for send button
+    document.getElementById('send').addEventListener('click', sendMessage);
+    
+    // Add keypress event to textarea to handle Enter key
+    document.getElementById('question').addEventListener('keypress', (event) => {
+      // Check if the Enter key is pressed without Shift (Shift+Enter would add a new line)
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Prevent the default action (new line)
+        sendMessage(); // Call the same function as the send button
+      }
+    });
+    
+    // Function to adjust the height of the markdown viewer based on content
+    function adjustViewerHeight() {
+      const markdownViewer = document.getElementById('markdown-viewer');
+      const contentHeight = markdownViewer.scrollHeight;
+      
+      console.log("Content scrollHeight:", contentHeight);
+      
+      // Get window height
+      const windowHeight = window.innerHeight;
+      
+      // Set the height of the viewer to show all content
+      markdownViewer.style.height = 'auto'; // First set to auto to get the natural height
+      
+      // Wait a moment for the layout to update
+      setTimeout(() => {
+        // Get the actual height after setting to auto
+        const actualContentHeight = markdownViewer.scrollHeight;
+        console.log("Actual content height:", actualContentHeight);
+        
+        // Calculate the total required window height
+        // Add padding for good measure
+        const totalRequiredHeight = actualContentHeight + 60; // Add more padding to ensure all content is visible
+        
+        console.log("Requesting window height:", totalRequiredHeight);
+        
+        // Send a request to the main process to resize the window
+        ipcRenderer.send('resize-window', totalRequiredHeight);
+      }, 100); // Short delay to allow DOM to update
+    }
+    
+    // Re-adjust height when window is resized
+    window.addEventListener('resize', adjustViewerHeight);
+  </script>
+  <script>
+    // Check for unhandled errors
+    window.addEventListener('error', (event) => {
+      console.error('Uncaught error:', event.error);
+      alert(`An unexpected error occurred: ${event.error.message}`);
+    });
+    
+    // Initialize the UI when loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('UI initialized and ready');
+      // Focus the question input
+      document.getElementById('question').focus();
+    });
+  </script>
+</body>
+</html>
